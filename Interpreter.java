@@ -9,45 +9,57 @@ public class Interpreter {
     private static char[]           code;
     private static int              dp, cp;
     private static Stack <Integer>  stack;
-    private static int              SIZE_ARRAY = 30000;
+    
+    // Constants
+    static final int              SIZE_ARRAY = 30000;
 
     public static void main ( String [] args ) throws Exception {
+        // Initialize variables
         array   = new byte [ SIZE_ARRAY ];
         Arrays.fill ( array, (byte) 0); 
         dp      = 0;
         stack   = new Stack<Integer>(); 
-
-        in  = new Scanner ( System.in );
-        System.out.println ( "Introduce el nombre del fichero donde esta el codigo Brainfuck" );
-
-        // Hola Mundo
-        code            = 
-            "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.".toCharArray();
-            
-        System.out.println( "Empieza el programa: \n_________________________________________\n\n" );
-
-        for ( cp=0; cp<code.length; cp++ ) {
-              switch ( code [ cp ] ) 
-              {
-                  case '<' :  before();
-                      break;
-                  case '>' :  next();
-                      break;
-                  case '+' :  add();
-                      break;
-                  case '-' :  sub();
-                      break;
-                  case '.' :  print();
-                      break;
-                  case ',' :  read();
-                      break;
-                  case '[' :  open();
-                      break;
-                  case ']' :  close(); 
-                      break;   
-              }
+        
+        // Check correct args
+        if ( args.length != 1 ) { 
+            System.out.println ( "Incorrect args\nUsage: java Interpreter <filename>" );
+            System.exit ( 1 ); 
         }
-        System.out.println ( "\n\n_________________________________________\nFin del programa" );
+        
+        // Read file
+        File    f       = new File ( args[0] );
+        Scanner file    = new Scanner ( f );
+        String  text    = "";
+        while ( file.hasNextLine() ) { 
+            text += file.nextLine();
+        }
+        code = text.toCharArray();
+        System.out.println ( "Code:\n" + new String(code) );
+        
+        // Start program
+        System.out.println( "Let's start: \n_________________________________________\n\n" );
+        for ( cp=0; cp<code.length; cp++ ) {
+            switch ( code [ cp ] ) 
+            {
+                case '<' :  before();
+                    break;
+                case '>' :  next();
+                    break;
+                case '+' :  add();
+                    break;
+                case '-' :  sub();
+                    break;
+                case '.' :  print();
+                    break;
+                case ',' :  read();
+                    break;
+                case '[' :  open();
+                    break;
+                case ']' :  close(); 
+                    break;   
+            }
+        }
+        System.out.println ( "\n\n_________________________________________\nEnd of the program" );
     }
 
     private static void before() {
@@ -69,7 +81,7 @@ public class Interpreter {
     }
 
     private static void print() throws Exception {
-        System.out.print( "" + (char) (array[dp]) );
+        System.out.print( (char) (array[dp]) );
     }
 
     private static void read () {
@@ -77,13 +89,14 @@ public class Interpreter {
     }
 
     private static void open () {
+        if ( array [ dp ] == ((byte)0) ) {
             for ( int numOpens = 1, numClosed = 0; numOpens == numClosed; cp++ ) {
                 if ( code [ cp ] == '[' )
                     numOpens ++;
                 if ( code [ cp ] == ']' )
                     numClosed ++;
             }
-            cp++;
+            cp += 1;
         }
         else {
             stack.push ( cp );
@@ -92,8 +105,7 @@ public class Interpreter {
 
     private static void close () {
         if ( !stack.isEmpty() ) { 
-            int aux = stack.pop();
-            cp = aux-1;
+            cp = stack.pop()-1;
         }
     }
 }
